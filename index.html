@@ -377,8 +377,452 @@
         const text = quoteEl.textContent;
         const words = text.split(' ');
         quoteEl.innerHTML = words.map((word, i) => 
-          `<span class="quote-word" style="animation-delay: ${i * 0.025}s;">${word} </span>`
-        ).join('');
+          `<span class="quote-word" style="animation-delay: ${i * 0.025}s;">${word}</span>`
+        ).join(' ');
+        
+        setTimeout(() => {
+          quoteEl.querySelectorAll('.quote-word').forEach(el => el.classList.add('animate'));
+        }, 10);
+      }
+
+      function updateActive() {
+        items.forEach((item, index) => {
+          if (index === activeIndex) {
+            item.classList.add('active');
+            animateQuote(item.querySelector('.quote'));
+          } else {
+            item.classList.remove('active');
+          }
+        });
+        updateImages();
+      }
+
+      function next() {
+        activeIndex = (activeIndex + 1) % items.length;
+        if (autoplayInterval) clearInterval(autoplayInterval);
+        updateActive();
+      }
+
+      function prev() {
+        activeIndex = (activeIndex - 1 + items.length) % items.length;
+        if (autoplayInterval) clearInterval(autoplayInterval);
+        updateActive();
+      }
+
+      prevBtn.addEventListener('click', prev);
+      nextBtn.addEventListener('click', next);
+
+      prevBtn.addEventListener('mouseenter', () => prevBtn.style.backgroundColor = colors.arrowHover);
+      prevBtn.addEventListener('mouseleave', () => prevBtn.style.backgroundColor = colors.arrowBg);
+      nextBtn.addEventListener('mouseenter', () => nextBtn.style.backgroundColor = colors.arrowHover);
+      nextBtn.addEventListener('mouseleave', () => nextBtn.style.backgroundColor = colors.arrowBg);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') prev();
+        if (e.key === 'ArrowRight') next();
+      });
+
+      window.addEventListener('resize', () => {
+        containerWidth = imageContainer.offsetWidth;
+        updateImages();
+      });
+
+      if (autoplay) {
+        autoplayInterval = setInterval(() => {
+          activeIndex = (activeIndex + 1) % items.length;
+          updateActive();
+        }, 5000);
+      }
+
+      updateActive();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.testimonial-container').forEach(initTestimonials);
+    });
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Circular Testimonials</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f0f0f0;
+      padding: 2rem;
+    }
+    .section {
+      margin-bottom: 4rem;
+    }
+    .testimonial-wrapper {
+      padding: 5rem 2rem;
+      border-radius: 0.5rem;
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .light-theme {
+      background-color: #f7f7fa;
+    }
+    .dark-theme {
+      background-color: #060507;
+    }
+    .testimonial-container {
+      width: 100%;
+      max-width: 56rem;
+      padding: 2rem;
+    }
+    .testimonial-grid {
+      display: grid;
+      gap: 3rem;
+    }
+    .image-container {
+      position: relative;
+      width: 100%;
+      height: 24rem;
+      perspective: 1000px;
+    }
+    .testimonial-image {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      transition: all 0.8s cubic-bezier(0.4, 2, 0.3, 1);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .testimonial-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .content-wrapper {
+      min-height: 250px;
+    }
+    .testimonial-item {
+      display: none;
+    }
+    .testimonial-item.active {
+      display: block;
+    }
+    .name {
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+    .designation {
+      margin-bottom: 2rem;
+    }
+    .quote {
+      line-height: 1.75;
+      margin-bottom: 2rem;
+    }
+    .quote-word {
+      display: inline-block;
+      opacity: 0;
+      filter: blur(10px);
+      transform: translateY(5px);
+    }
+    .quote-word.animate {
+      animation: wordFadeIn 0.22s ease-in-out forwards;
+    }
+    @keyframes wordFadeIn {
+      to {
+        opacity: 1;
+        filter: blur(0);
+        transform: translateY(0);
+      }
+    }
+    .arrow-buttons {
+      display: flex;
+      gap: 1.5rem;
+      padding-top: 3rem;
+    }
+    .arrow-button {
+      width: 2.7rem;
+      height: 2.7rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      border: none;
+      font-size: 1.3rem;
+    }
+    .arrow-button:hover {
+      transform: scale(1.05);
+    }
+    @media (min-width: 768px) {
+      .testimonial-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 5rem;
+      }
+      .arrow-buttons {
+        padding-top: 0;
+      }
+    }
+    @media (max-width: 767px) {
+      .testimonial-wrapper {
+        padding: 3rem 1rem;
+      }
+      .testimonial-container {
+        padding: 1rem;
+      }
+      .image-container {
+        height: 18rem;
+      }
+      .content-wrapper {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Light Theme Section -->
+  <div class="section">
+    <div class="testimonial-wrapper light-theme">
+      <div class="testimonial-container" 
+           data-autoplay="true"
+           data-name-color="#0a0a0a"
+           data-designation-color="#454545"
+           data-testimony-color="#171717"
+           data-arrow-bg="#141414"
+           data-arrow-fg="#f1f1f7"
+           data-arrow-hover="#00A6FB"
+           data-name-size="28px"
+           data-designation-size="20px"
+           data-quote-size="20px">
+        
+        <div class="testimonial-grid">
+          <!-- Images Container -->
+          <div class="image-container">
+            <img src="https://images.unsplash.com/photo-1512316609839-ce289d3eba0a?q=80&w=1368&auto=format&fit=crop" 
+                 alt="Tamar Mendelson" 
+                 class="testimonial-image" 
+                 data-index="0">
+            <img src="https://images.unsplash.com/photo-1628749528992-f5702133b686?q=80&w=1368&auto=format&fit=crop" 
+                 alt="Joe Charlescraft" 
+                 class="testimonial-image" 
+                 data-index="1">
+            <img src="https://images.unsplash.com/photo-1524267213992-b76e8577d046?q=80&w=1368&auto=format&fit=crop" 
+                 alt="Martina Edelweist" 
+                 class="testimonial-image" 
+                 data-index="2">
+          </div>
+
+          <!-- Content Container -->
+          <div class="testimonial-content">
+            <div class="content-wrapper">
+              <!-- Testimonial 1 -->
+              <div class="testimonial-item active" data-index="0">
+                <h3 class="name">Tamar Mendelson</h3>
+                <p class="designation">Restaurant Critic</p>
+                <p class="quote">I was impressed by the food! And I could really tell that they use high-quality ingredients. The staff was friendly and attentive. I'll definitely be back for more!</p>
+              </div>
+
+              <!-- Testimonial 2 -->
+              <div class="testimonial-item" data-index="1">
+                <h3 class="name">Joe Charlescraft</h3>
+                <p class="designation">Frequent Visitor</p>
+                <p class="quote">This place exceeded all expectations! The atmosphere is inviting, and the staff truly goes above and beyond. I'll keep returning for more exceptional dining experience.</p>
+              </div>
+
+              <!-- Testimonial 3 -->
+              <div class="testimonial-item" data-index="2">
+                <h3 class="name">Martina Edelweist</h3>
+                <p class="designation">Satisfied Customer</p>
+                <p class="quote">Shining Yam is a hidden gem! The impeccable service and overall attention to detail created a memorable experience. I highly recommend it!</p>
+              </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="arrow-buttons">
+              <button class="arrow-button prev-button" aria-label="Previous">
+                <i class="fas fa-arrow-left"></i>
+              </button>
+              <button class="arrow-button next-button" aria-label="Next">
+                <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  
+  <!-- Dark Theme Section -->
+  <div class="section">
+    <div class="testimonial-wrapper dark-theme">
+      <div class="testimonial-container" 
+           data-autoplay="true"
+           data-name-color="#f7f7ff"
+           data-designation-color="#e1e1e1"
+           data-testimony-color="#f1f1f7"
+           data-arrow-bg="#0582CA"
+           data-arrow-fg="#141414"
+           data-arrow-hover="#f7f7ff"
+           data-name-size="28px"
+           data-designation-size="20px"
+           data-quote-size="20px">
+        
+        <div class="testimonial-grid">
+          <!-- Images Container -->
+          <div class="image-container">
+            <img src="https://images.unsplash.com/photo-1512316609839-ce289d3eba0a?q=80&w=1368&auto=format&fit=crop" 
+                 alt="Tamar Mendelson" 
+                 class="testimonial-image" 
+                 data-index="0">
+            <img src="https://images.unsplash.com/photo-1628749528992-f5702133b686?q=80&w=1368&auto=format&fit=crop" 
+                 alt="Joe Charlescraft" 
+                 class="testimonial-image" 
+                 data-index="1">
+            <img src="https://images.unsplash.com/photo-1524267213992-b76e8577d046?q=80&w=1368&auto=format&fit=crop" 
+                 alt="Martina Edelweist" 
+                 class="testimonial-image" 
+                 data-index="2">
+          </div>
+
+          <!-- Content Container -->
+          <div class="testimonial-content">
+            <div class="content-wrapper">
+              <!-- Testimonial 1 -->
+              <div class="testimonial-item active" data-index="0">
+                <h3 class="name">Tamar Mendelson</h3>
+                <p class="designation">Restaurant Critic</p>
+                <p class="quote">I was impressed by the food! And I could really tell that they use high-quality ingredients. The staff was friendly and attentive. I'll definitely be back for more!</p>
+              </div>
+
+              <!-- Testimonial 2 -->
+              <div class="testimonial-item" data-index="1">
+                <h3 class="name">Joe Charlescraft</h3>
+                <p class="designation">Frequent Visitor</p>
+                <p class="quote">This place exceeded all expectations! The atmosphere is inviting, and the staff truly goes above and beyond. I'll keep returning for more exceptional dining experience.</p>
+              </div>
+
+              <!-- Testimonial 3 -->
+              <div class="testimonial-item" data-index="2">
+                <h3 class="name">Martina Edelweist</h3>
+                <p class="designation">Satisfied Customer</p>
+                <p class="quote">Shining Yam is a hidden gem! The impeccable service and overall attention to detail created a memorable experience. I highly recommend it!</p>
+              </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="arrow-buttons">
+              <button class="arrow-button prev-button" aria-label="Previous">
+                <i class="fas fa-arrow-left"></i>
+              </button>
+              <button class="arrow-button next-button" aria-label="Next">
+                <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function calculateGap(width) {
+      const minWidth = 1024;
+      const maxWidth = 1456;
+      const minGap = 60;
+      const maxGap = 86;
+      if (width <= minWidth) return minGap;
+      if (width >= maxWidth) return Math.max(minGap, maxGap + 0.06018 * (width - maxWidth));
+      return minGap + (maxGap - minGap) * ((width - minWidth) / (maxWidth - minWidth));
+    }
+
+    function initTestimonials(container) {
+      const items = container.querySelectorAll('.testimonial-item');
+      const images = container.querySelectorAll('.testimonial-image');
+      const imageContainer = container.querySelector('.image-container');
+      const prevBtn = container.querySelector('.prev-button');
+      const nextBtn = container.querySelector('.next-button');
+      const quotes = container.querySelectorAll('.quote');
+      
+      const colors = {
+        name: container.dataset.nameColor,
+        designation: container.dataset.designationColor,
+        testimony: container.dataset.testimonyColor,
+        arrowBg: container.dataset.arrowBg,
+        arrowFg: container.dataset.arrowFg,
+        arrowHover: container.dataset.arrowHover
+      };
+      
+      const sizes = {
+        name: container.dataset.nameSize,
+        designation: container.dataset.designationSize,
+        quote: container.dataset.quoteSize
+      };
+      
+      const autoplay = container.dataset.autoplay === 'true';
+      let activeIndex = 0;
+      let autoplayInterval = null;
+      let containerWidth = imageContainer.offsetWidth;
+
+      // Apply colors and sizes
+      container.querySelectorAll('.name').forEach(el => {
+        el.style.color = colors.name;
+        el.style.fontSize = sizes.name;
+      });
+      container.querySelectorAll('.designation').forEach(el => {
+        el.style.color = colors.designation;
+        el.style.fontSize = sizes.designation;
+      });
+      quotes.forEach(el => {
+        el.style.color = colors.testimony;
+        el.style.fontSize = sizes.quote;
+      });
+      
+      prevBtn.style.backgroundColor = colors.arrowBg;
+      nextBtn.style.backgroundColor = colors.arrowBg;
+      prevBtn.querySelector('i').style.color = colors.arrowFg;
+      nextBtn.querySelector('i').style.color = colors.arrowFg;
+
+      function updateImages() {
+        const gap = calculateGap(containerWidth);
+        const maxStickUp = gap * 0.8;
+        const len = images.length;
+
+        images.forEach((img, index) => {
+          const isActive = index === activeIndex;
+          const isLeft = (activeIndex - 1 + len) % len === index;
+          const isRight = (activeIndex + 1) % len === index;
+
+          if (isActive) {
+            img.style.cssText = `z-index: 3; opacity: 1; pointer-events: auto; transform: translateX(0px) translateY(0px) scale(1) rotateY(0deg);`;
+          } else if (isLeft) {
+            img.style.cssText = `z-index: 2; opacity: 1; pointer-events: auto; transform: translateX(-${gap}px) translateY(-${maxStickUp}px) scale(0.85) rotateY(15deg);`;
+          } else if (isRight) {
+            img.style.cssText = `z-index: 2; opacity: 1; pointer-events: auto; transform: translateX(${gap}px) translateY(-${maxStickUp}px) scale(0.85) rotateY(-15deg);`;
+          } else {
+            img.style.cssText = `z-index: 1; opacity: 0; pointer-events: none;`;
+          }
+        });
+      }
+
+      function animateQuote(quoteEl) {
+        const text = quoteEl.textContent;
+        const words = text.split(' ');
+        quoteEl.innerHTML = words.map((word, i) => 
+          `<span class="quote-word" style="animation-delay: ${i * 0.025}s;">${word}</span>`
+        ).join(' ');
         
         setTimeout(() => {
           quoteEl.querySelectorAll('.quote-word').forEach(el => el.classList.add('animate'));
